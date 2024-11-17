@@ -1,9 +1,8 @@
-# Import necessary libraries
 from transformers import pipeline, VitsModel, AutoTokenizer  # Import pipeline, VITS model, and tokenizer from Hugging Face Transformers
 import torch  # Import PyTorch for tensor operations and model inference
 import torchaudio  # Import torchaudio for saving audio files
 
-# Convert audio file to text, then convert back to speech using MMS pipeline
+# Convert audio file to text, translate the text to Tok Pisin, then convert back to speech using MMS pipeline
 def process_audio_with_mms(input_audio_path, output_audio_path):
     # Initialize the MMS pipeline for automatic speech recognition
     # This pipeline converts speech in an audio file to text
@@ -16,16 +15,24 @@ def process_audio_with_mms(input_audio_path, output_audio_path):
     
     print(f"Transcribed text: {transcribed_text}")  # Print the transcribed text to see the result
     
-    # Initialize the VITS model and tokenizer for text-to-speech conversion
-    # The VITS model generates speech from the given text
-    model = VitsModel.from_pretrained("facebook/mms-tts-spa")
-    tokenizer = AutoTokenizer.from_pretrained("facebook/mms-tts-spa")
+    # Initialize the translation pipeline for translating from English to Tok Pisin
+    # Make sure you have installed `sentencepiece` for this tokenizer to work properly
+    translation_pipe = pipeline("translation", model="Helsinki-NLP/opus-mt-en-tpi")
     
-    # Tokenize the transcribed text
+    # Translate the transcribed text to Tok Pisin
+    translated_text = translation_pipe(transcribed_text)[0]['translation_text']
+    
+    print(f"Translated text: {translated_text}")  # Print the translated text to see the result
+    
+    # Initialize the VITS model and tokenizer for text-to-speech conversion in Tok Pisin
+    model = VitsModel.from_pretrained("facebook/mms-tts-tpi")
+    tokenizer = AutoTokenizer.from_pretrained("facebook/mms-tts-tpi")
+    
+    # Tokenize the translated text
     # The tokenizer converts the text into a format that the model can process
-    inputs = tokenizer(transcribed_text, return_tensors="pt")  # "pt" means PyTorch tensor format
+    inputs = tokenizer(translated_text, return_tensors="pt")  # "pt" means PyTorch tensor format
     
-    # Generate audio waveform from the transcribed text using VITS model
+    # Generate audio waveform from the translated text using VITS model
     # The model takes the tokenized input and produces the audio waveform
     with torch.no_grad():  # Disable gradient calculation since we are only doing inference
         output = model(**inputs).waveform  # Generate waveform from the model
@@ -43,7 +50,7 @@ def process_audio_with_mms(input_audio_path, output_audio_path):
 # End to end conversion (audio file -> audio file)
 def main(input_audio_path, output_audio_path):
     # Convert the audio file using MMS pipeline
-    # This function takes an input audio file, converts it to text, then back to speech
+    # This function takes an input audio file, converts it to text, translates it to Tok Pisin, then back to speech
     process_audio_with_mms(input_audio_path, output_audio_path)
 
 # Example usage
@@ -53,8 +60,8 @@ if __name__ == "__main__":
     # Output audio file path where the converted audio will be saved
     output_audio_path = "./test-output.wav"
     
-    # Run the main function to perform the conversion (speech to text -> text to speech)
+    # Run the main function to perform the conversion (speech to text -> translation -> text to speech)
     main(input_audio_path, output_audio_path)
     
     # Print a message indicating completion
-    print("Speech to text to speech conversion completed.")
+    print("Speech to text to translation to speech conversion completed.")
