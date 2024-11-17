@@ -2,8 +2,8 @@ from transformers import pipeline, VitsModel, AutoTokenizer  # Import pipeline, 
 import torch  # Import PyTorch for tensor operations and model inference
 import torchaudio  # Import torchaudio for saving audio files
 
-# Convert audio file to text, translate the text to Tok Pisin, then convert back to speech using MMS pipeline
-def process_audio_with_mms(input_audio_path, output_audio_path):
+# Convert audio file to text, translate the text to Tok Pisin, then convert back to speech
+def process_audio(input_audio_path, output_audio_path):
     # Initialize the MMS pipeline for automatic speech recognition
     # This pipeline converts speech in an audio file to text
     asr_pipe = pipeline("automatic-speech-recognition", model="facebook/mms-1b-all")
@@ -47,21 +47,20 @@ def process_audio_with_mms(input_audio_path, output_audio_path):
     
     print(f"Audio file saved to: {output_audio_path}")  # Print confirmation that the audio file is saved
 
-# End to end conversion (audio file -> audio file)
+# Main function to run the entire process
 def main(input_audio_path, output_audio_path):
-    # Convert the audio file using MMS pipeline
-    # This function takes an input audio file, converts it to text, translates it to Tok Pisin, then back to speech
-    process_audio_with_mms(input_audio_path, output_audio_path)
+    # Call the process_audio function to convert speech to text, translate, and convert back to speech
+    process_audio(input_audio_path, output_audio_path)
 
-# Example usage
+# Entry point of the script
 if __name__ == "__main__":
     # Input audio file path (change this to the location of your audio file)
     input_audio_path = "./test-input.wav"
-    # Output audio file path where the converted audio will be saved
+    # Output audio file path (change this to the desired location and name of the output audio file)
     output_audio_path = "./test-output.wav"
     
-    # Run the main function to perform the conversion (speech to text -> translation -> text to speech)
+    # Call the main function with the input and output audio file paths
     main(input_audio_path, output_audio_path)
     
-    # Print a message indicating completion
+    # Print completion message
     print("Speech to text to translation to speech conversion completed.")
