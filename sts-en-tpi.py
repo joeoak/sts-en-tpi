@@ -1,5 +1,6 @@
-from transformers import pipeline, VitsModel, AutoTokenizer
+import argparse
 import torchaudio
+from transformers import pipeline, VitsModel, AutoTokenizer
 
 # Convert audio file to text, translate text to Tok Pisin, then convert translated text to speech
 def sts_en_tpi(input_audio_path, output_audio_path):
@@ -35,5 +36,12 @@ def sts_en_tpi(input_audio_path, output_audio_path):
     
     print(f"Audio saved at: {output_audio_path}")  # Print confirmation
 
-# Example usage
-sts_en_tpi("test-input.wav", "test-output.wav")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Convert English audio to Tok Pisin audio")
+    parser.add_argument("input_audio_path", type=str, help="Path to input audio file")
+    parser.add_argument("output_audio_path", type=str, help="Path to save output audio file")
+    args = parser.parse_args()
+
+    sts_en_tpi(args.input_audio_path, args.output_audio_path)
+
+# Example usage: python sts-en-tpi.py test-input.wav test-output.wav
